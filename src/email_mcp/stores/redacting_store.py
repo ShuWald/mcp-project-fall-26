@@ -18,17 +18,16 @@ import re
 EMAIL_ADDRESS = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 # A North American phone number: 713-853-6161, 713.853.6161 or
 # (713) 853-6161.
-PHONE_NUMBER = re.compile(r"\(?\b\d{3}\)?[-. ]?\d{3}[-.]\d{4}\b")
+PHONE_NUMBER = re.compile(
+    r"[\(\[]*\b\d{3}[\)\]]*[-. \/]?\s*\d{3}[-. \/]\d{4}(?!\d)"
+)
 
 
 def redact(text):
     """Return text with every email address and phone number replaced."""
-    # TODO 4, part 1: replace each email address with [email] and each
-    # phone number with [phone].
-    # Hint: EMAIL_ADDRESS.sub("[email]", text) returns a copy of text with
-    #       every email address replaced by [email]. Do the same with
-    #       PHONE_NUMBER, then return the result.
-    raise NotImplementedError("TODO 4: fill in redact in redacting_store.py")
+    text = EMAIL_ADDRESS.sub("[email]", text)
+    text = PHONE_NUMBER.sub("[phone]", text)
+    return text
 
 
 class RedactingStore:
@@ -50,11 +49,10 @@ class RedactingStore:
         return results
 
     def get(self, email_id):
-        # TODO 4, part 2: return the wrapped store's email with its subject
-        # and body redacted.
-        # search() above is your model.
-        # Hint 1: self._store.get(email_id) returns the email, or None when
-        #         no email has that id. Return None in that case.
-        # Hint 2: copy the email with dict(...) before changing it, then
-        #         pass its subject and body through redact().
-        raise NotImplementedError("TODO 4: fill in RedactingStore.get in redacting_store.py")
+        email = self._store.get(email_id)
+        if email is None: 
+            return None
+        email = dict(email)
+        email["subject"] = redact(email["subject"])
+        email["body"] = redact(email["body"])
+        return email
